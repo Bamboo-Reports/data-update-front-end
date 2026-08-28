@@ -11,3 +11,6 @@ next-env.d.ts
 *.json.key
 bamboo-reports-*.json
 credentials/
+
+# Installed skill packages (tracked by skills-lock.json)
+.agents/skills/
