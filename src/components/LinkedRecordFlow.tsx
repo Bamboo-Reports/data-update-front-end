@@ -19,7 +19,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import RecordEditor, { type CloseGuard } from "./RecordEditor";
 
 /**
- * One link in the BR → CM → SM chain: which register to add to next, what it
+ * One link in the accounts → centers → services chain: which register to add to next, what it
  * inherits from the record just created, and whether the user may decline.
  *
  * The inherited names are copied from the saved row, never retyped, and the
@@ -27,7 +27,7 @@ import RecordEditor, { type CloseGuard } from "./RecordEditor";
  * rule: the user is not given a place to spell the name differently.
  */
 export interface LinkedStep {
-  target: "cm" | "sm";
+  target: "centers" | "services";
   prefill: Record<string, string>;
   lockedKeys: string[];
   prompt: {
@@ -50,15 +50,15 @@ export function nextLinkedStep(
 ): LinkedStep | null {
   const v = created.values;
 
-  if (schema.id === "br") {
+  if (schema.id === "accounts") {
     const account = v.accountName ?? "";
     return {
-      target: "cm",
+      target: "centers",
       prefill: { accountName: account },
       lockedKeys: ["accountName"],
       prompt: {
         title: "Account created. Now add its first center.",
-        description: `Every account needs at least one center. ${account} has none yet, so the next step is a CM record. The account name is carried over exactly as you entered it.`,
+        description: `Every account needs at least one center. ${account} has none yet, so the next step is a centers record. The account name is carried over exactly as you entered it.`,
         confirmLabel: "Add first center",
       },
       closeGuard: {
@@ -69,7 +69,7 @@ export function nextLinkedStep(
     };
   }
 
-  if (schema.id === "cm") {
+  if (schema.id === "centers") {
     const center = v.centerLegalName ?? "";
     const status = v.centerStatus ?? "";
     const active = status === ACTIVE_CENTER;
@@ -83,31 +83,31 @@ export function nextLinkedStep(
     const lockedKeys = ["accountName", "centerLegalName"];
     if (active) {
       return {
-        target: "sm",
+        target: "services",
         prefill,
         lockedKeys,
         prompt: {
-          title: `${center} is an active center, so it needs a Service Master record.`,
+          title: `${center} is an active center, so it needs a services record.`,
           description:
-            "Add the SM record now. The account and center names are carried over from CM, and the center type, focus and city are filled in to match.",
-          confirmLabel: "Add SM record",
+            "Add the services record now. The account and center names are carried over from centers, and the center type, focus and city are filled in to match.",
+          confirmLabel: "Add services record",
         },
         closeGuard: {
           title: "Leave without services?",
-          description: `${center} is an active center and needs a Service Master record. You can save the SM as a draft and finish it later instead.`,
+          description: `${center} is an active center and needs a services record. You can save the services record as a draft and finish it later instead.`,
           leaveLabel: "Leave anyway",
         },
       };
     }
     return {
-      target: "sm",
+      target: "services",
       prefill,
       lockedKeys,
       prompt: {
         title: `Add services for ${center}?`,
-        description: `${center} is ${status || "not yet active"}, so a Service Master record is optional. You can add one now or come back to it later.`,
-        confirmLabel: "Add SM record",
-        skipLabel: "No SM for this center",
+        description: `${center} is ${status || "not yet active"}, so a services record is optional. You can add one now or come back to it later.`,
+        confirmLabel: "Add services record",
+        skipLabel: "No services for this center",
       },
     };
   }

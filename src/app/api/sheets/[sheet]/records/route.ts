@@ -16,8 +16,7 @@ import { deleteDraft } from "@/lib/sheets/drafts";
 import { validateRecord } from "@/lib/validate";
 import { requireUser } from "@/lib/session";
 import { errorResponse } from "@/lib/api";
-import { canonicalSheetDate } from "@/lib/format";
-import { todaySheetDate } from "@/lib/format";
+import { canonicalSheetDate, stripInvisible, todaySheetDate } from "@/lib/format";
 import { MAX_PAGE_SIZE, MIN_QUERY_LENGTH } from "@/lib/search";
 
 export const dynamic = "force-dynamic";
@@ -93,7 +92,7 @@ export async function POST(req: NextRequest, { params }: Params) {
     for (const field of schema.fields) {
       // Computed columns get their formulas pasted in after the row is added.
       if (field.kind === "readonly" || field.computed) continue;
-      values[field.key] = (incoming[field.key] ?? "").trim();
+      values[field.key] = stripInvisible((incoming[field.key] ?? "").trim());
       // Dates go into the sheet in one shape only; a typed "07-Aug-2026" is
       // normalised here rather than bounced.
       if (field.kind === "date" && values[field.key]) {

@@ -40,8 +40,8 @@ export default async function SignInPage({
           Sign in to update records
         </h1>
         <p className="text-muted-foreground mt-2 text-sm text-pretty">
-          Search and maintain BR, CM, and SM records without opening the master
-          sheet.
+          Search and maintain accounts, centers and services without opening the
+          master sheet.
         </p>
 
         {message && (

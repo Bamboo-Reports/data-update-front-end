@@ -53,7 +53,7 @@ export default function RecordFinder({
   const [cursor, setCursor] = useState(-1);
   const [editor, setEditor] = useState<EditorTarget>(null);
   const [historyFor, setHistoryFor] = useState<RecordRow | null>(null);
-  // The BR → CM → SM chain that follows a create, driven by LinkedRecordFlow.
+  // The accounts → centers → services chain that follows a create, driven by LinkedRecordFlow.
   const [linkedStep, setLinkedStep] = useState<LinkedStep | null>(null);
   const [drafts, setDrafts] = useState<DraftRecord[]>(initialDrafts ?? []);
   const [draftsLoading, setDraftsLoading] = useState(false);
@@ -164,7 +164,7 @@ export default function RecordFinder({
         const sp = new URLSearchParams({
           q: term,
           pageSize: String(MAX_PAGE_SIZE),
-          // Sorting by the record's own name column keeps CM and SM sensible
+          // Sorting by the record's own name column keeps centers and services sensible
           // too, where the title is the center rather than the company.
           sortBy: card.titleKey,
           sortDir: "asc",
@@ -481,7 +481,7 @@ export default function RecordFinder({
           onStep={setLinkedStep}
           onDone={() => {
             setLinkedStep(null);
-            // The chain may have written to this register (CM page → new CM).
+            // The chain may have written to this register (centers page → new center).
             setReloadToken((n) => n + 1);
             setDraftReloadToken((n) => n + 1);
           }}

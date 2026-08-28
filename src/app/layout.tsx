@@ -13,7 +13,7 @@ const dmSans = DM_Sans({
 
 export const metadata: Metadata = {
   title: "Bamboo Reports Updater",
-  description: "Look up and maintain records in the CM/SM Centers master sheet",
+  description: "Look up and maintain accounts, centers and services in the master sheet",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

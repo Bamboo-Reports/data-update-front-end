@@ -1,26 +1,22 @@
 import type { SheetSchema } from "./types";
-import { CENTER_FOCUS, CENTER_TYPES } from "./cm";
-
-const TEAM_MEMBERS = [
-  "Anusha", "Ayushi", "Pradhyumna", "Priyansh", "Rakshan",
-  "Ranu", "Renuka", "Sangeeta", "Shreya", "Surabhi",
-] as const;
+import { CENTER_FOCUS, CENTER_TYPES } from "./centers";
 
 /**
- * SM is one row per center, describing the service lines that center runs.
- * Most of it is paired columns: a free-text list of services, and the links
- * that evidence them.
+ * `services` is one row per center, describing the service lines that center
+ * runs. Most of it is paired columns: a free-text list of services, and the
+ * links that evidence them. Field order below is the column order in the
+ * sheet, A onwards: the repo maps fields to columns by position.
  */
-export const SM_SCHEMA: SheetSchema = {
-  id: "sm",
-  sheetName: "SM",
-  label: "SM",
-  idHeader: "UUID",
+export const SERVICES_SCHEMA: SheetSchema = {
+  id: "services",
+  sheetName: "services",
+  label: "Services",
+  idHeader: "uuid",
   idPrefix: "CN",
-  titleHeader: "Center Legal Name",
+  titleHeader: "center_name",
   titleUnique: false,
-  subtitleHeaders: ["Account Global Legal Name", "City"],
-  archiveSheetName: "SM_Archive",
+  subtitleHeaders: ["account_global_legal_name", "center_city"],
+  archiveSheetName: "services_archive",
   groups: [
     "Identity",
     "Center",
@@ -32,7 +28,7 @@ export const SM_SCHEMA: SheetSchema = {
   fields: [
     {
       key: "uuid",
-      header: "UUID",
+      header: "uuid",
       label: "UUID",
       kind: "readonly",
       group: "Identity",
@@ -41,7 +37,7 @@ export const SM_SCHEMA: SheetSchema = {
     },
     {
       key: "lastUpdateDate",
-      header: "Last Update Date",
+      header: "last_update_date",
       label: "Last Update Date",
       kind: "date",
       required: true,
@@ -49,27 +45,17 @@ export const SM_SCHEMA: SheetSchema = {
       help: "Stored as d-MMMM-yyyy to match the existing sheet.",
     },
     {
-      key: "teamMember",
-      header: "Team Member",
-      label: "Team Member",
-      kind: "select",
-      required: true,
-      group: "Identity",
-      options: TEAM_MEMBERS,
-      help: "Who researched this row.",
-    },
-    {
-      key: "cnConcatenate",
-      header: "CN CONCATENATE",
-      label: "CN Concatenate",
+      key: "cnUniqueMerge",
+      header: "cn_unique_merge",
+      label: "CN Unique Merge",
       kind: "readonly",
       computed: true,
       group: "Identity",
-      help: "Built by the sheet from company, center, type, focus and city.",
+      help: "Built by the sheet from account, center, type, focus and city.",
     },
     {
       key: "cnUniqueKey",
-      header: "CN Unique Key",
+      header: "cn_unique_key",
       label: "CN Unique Key",
       kind: "readonly",
       computed: true,
@@ -79,35 +65,37 @@ export const SM_SCHEMA: SheetSchema = {
 
     {
       key: "accountName",
-      header: "Account Global Legal Name",
+      header: "account_global_legal_name",
       label: "Account Global Legal Name",
       kind: "combo",
       required: true,
+      noUrl: true,
       group: "Center",
       inTable: true,
-      optionSource: { sheetName: "BR", header: "Account Global Legal Name" },
-      help: "Choose the account from BR.",
+      optionSource: { sheetName: "accounts", header: "account_global_legal_name" },
+      help: "Choose the account from accounts.",
     },
     {
       key: "centerLegalName",
-      header: "Center Legal Name",
-      label: "Center Legal Name",
+      header: "center_name",
+      label: "Center Name",
       kind: "combo",
       required: true,
+      noUrl: true,
       group: "Center",
       inTable: true,
       maxLength: 120,
       optionSource: {
-        sheetName: "CM",
-        header: "Center Legal Name",
-        groupBy: { header: "Account Global Legal Name", fieldKey: "accountName" },
+        sheetName: "centers",
+        header: "center_name",
+        groupBy: { header: "account_global_legal_name", fieldKey: "accountName" },
         creatable: true,
       },
-      help: "Pick one of the account's centers from CM, or add a new name. It must match CM exactly.",
+      help: "Pick one of the account's centers from centers, or add a new name. It must match centers exactly.",
     },
     {
       key: "centerType",
-      header: "Center Type",
+      header: "center_type",
       label: "Center Type",
       kind: "select",
       required: true,
@@ -117,7 +105,7 @@ export const SM_SCHEMA: SheetSchema = {
     },
     {
       key: "centerFocus",
-      header: "Center Focus",
+      header: "center_focus",
       label: "Center Focus",
       kind: "select",
       required: true,
@@ -126,44 +114,45 @@ export const SM_SCHEMA: SheetSchema = {
     },
     {
       key: "city",
-      header: "City",
+      header: "center_city",
       label: "City",
       kind: "combo",
       required: true,
+      noUrl: true,
       group: "Center",
       inTable: true,
     },
 
     {
-      // Misspelled in the sheet; the header must match it exactly.
-      key: "primaryServicesFocus",
-      header: "Primary Serivces Foucs",
-      label: "Primary Services Focus",
+      key: "primaryService",
+      header: "primary_service",
+      label: "Primary Service",
       kind: "longtext",
+      noUrl: true,
       group: "Focus",
       maxLength: 800,
       help: "One service per line.",
     },
     {
-      key: "primaryServicesSource",
-      header: "Primary Services Source",
-      label: "Primary Services Source",
+      key: "primaryServiceSource",
+      header: "primary_service_source_link",
+      label: "Primary Service Source",
       kind: "url",
       group: "Focus",
     },
     {
       key: "focusRegion",
-      header: "Focus Region",
+      header: "focus_region",
       label: "Focus Region",
       kind: "longtext",
-      required: true,
+      noUrl: true,
       group: "Focus",
       maxLength: 200,
       help: "One region per line, e.g. Global, India, LATM.",
     },
     {
       key: "focusRegionSource",
-      header: "Focus Region Source Link",
+      header: "focus_region_link",
       label: "Focus Region Source",
       kind: "url",
       group: "Focus",
@@ -171,56 +160,61 @@ export const SM_SCHEMA: SheetSchema = {
 
     {
       key: "it",
-      header: "IT",
+      header: "service_it",
       label: "IT",
       kind: "longtext",
+      noUrl: true,
       group: "Service Lines",
       maxLength: 600,
       help: "One service per line.",
     },
-    { key: "itSource", header: "IT Source Link", label: "IT Source", kind: "url", group: "Service Lines" },
+    { key: "itSource", header: "service_it_link", label: "IT Source", kind: "url", group: "Service Lines" },
 
     {
       key: "erd",
-      header: "ER&D",
+      header: "service_erd",
       label: "ER&D",
       kind: "longtext",
+      noUrl: true,
       group: "Service Lines",
       maxLength: 600,
     },
-    { key: "erdSource", header: "ER&D Source Link", label: "ER&D Source", kind: "url", group: "Service Lines" },
+    { key: "erdSource", header: "service_erd_link", label: "ER&D Source", kind: "url", group: "Service Lines" },
 
     {
       key: "fna",
-      header: "FnA",
+      header: "service_fna",
       label: "Finance & Accounting",
       kind: "longtext",
+      noUrl: true,
       group: "Service Lines",
       maxLength: 600,
     },
-    { key: "fnaSource", header: "FnA Source Link", label: "Finance & Accounting Source", kind: "url", group: "Service Lines" },
+    { key: "fnaSource", header: "service_fna_link", label: "Finance & Accounting Source", kind: "url", group: "Service Lines" },
 
     {
       key: "hr",
-      header: "HR",
+      header: "service_hr",
       label: "HR",
       kind: "longtext",
+      noUrl: true,
       group: "Service Lines",
       maxLength: 600,
     },
-    { key: "hrSource", header: "HR Source Link", label: "HR Source", kind: "url", group: "Service Lines" },
+    { key: "hrSource", header: "service_hr_link", label: "HR Source", kind: "url", group: "Service Lines" },
 
     {
       key: "procurement",
-      header: "Procurement & Supply Chain",
+      header: "service_procurement",
       label: "Procurement & Supply Chain",
       kind: "longtext",
+      noUrl: true,
       group: "Service Lines",
       maxLength: 600,
     },
     {
       key: "procurementSource",
-      header: "Procurement & Supply Chain Source Link",
+      header: "service_procurement_link",
       label: "Procurement & Supply Chain Source",
       kind: "url",
       group: "Service Lines",
@@ -228,15 +222,16 @@ export const SM_SCHEMA: SheetSchema = {
 
     {
       key: "salesMarketing",
-      header: "Sales & Marketing",
+      header: "service_sales_marketing",
       label: "Sales & Marketing",
       kind: "longtext",
+      noUrl: true,
       group: "Service Lines",
       maxLength: 700,
     },
     {
       key: "salesMarketingSource",
-      header: "Sales & Marketing Source Link",
+      header: "service_sales_marketing_link",
       label: "Sales & Marketing Source",
       kind: "url",
       group: "Service Lines",
@@ -244,15 +239,16 @@ export const SM_SCHEMA: SheetSchema = {
 
     {
       key: "customerSupport",
-      header: "Customer Support Services",
+      header: "service_customer_support",
       label: "Customer Support Services",
       kind: "longtext",
+      noUrl: true,
       group: "Service Lines",
       maxLength: 400,
     },
     {
       key: "customerSupportSource",
-      header: "Customer Services Source Link",
+      header: "service_customer_support_link",
       label: "Customer Support Source",
       kind: "url",
       group: "Service Lines",
@@ -260,34 +256,37 @@ export const SM_SCHEMA: SheetSchema = {
 
     {
       key: "others",
-      header: "Others",
+      header: "service_others",
       label: "Other Services",
       kind: "longtext",
+      noUrl: true,
       group: "Service Lines",
       maxLength: 800,
     },
-    { key: "othersSource", header: "Others Source Link", label: "Other Services Source", kind: "url", group: "Service Lines" },
+    { key: "othersSource", header: "service_others_link", label: "Other Services Source", kind: "url", group: "Service Lines" },
 
     {
       key: "softwareVendor",
-      header: "Software Vendor",
+      header: "software_vendor",
       label: "Software Vendor",
       kind: "longtext",
+      noUrl: true,
       group: "Software",
       maxLength: 500,
       help: "One vendor per line.",
     },
     {
       key: "softwareInUse",
-      header: "Software in Use",
+      header: "software_in_use",
       label: "Software in Use",
       kind: "longtext",
+      noUrl: true,
       group: "Software",
       maxLength: 400,
     },
     {
       key: "softwareSource",
-      header: "Software Source Link",
+      header: "software_in_use_link",
       label: "Software Source",
       kind: "url",
       group: "Software",
@@ -295,7 +294,7 @@ export const SM_SCHEMA: SheetSchema = {
 
     {
       key: "comments",
-      header: "Comments",
+      header: "comments",
       label: "Comments",
       kind: "longtext",
       group: "Notes",

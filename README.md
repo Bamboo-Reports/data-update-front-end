@@ -1,22 +1,29 @@
 # Bamboo Reports Updater
 
-A controlled editing surface for the `CM/SM-Centers Master` Google Sheet, so the
-team can add, update and archive records without being given edit access to the
+A controlled editing surface for the centers master Google Sheet, so the team
+can add, update and archive records without being given edit access to the
 spreadsheet itself.
 
-**BR**, **CM** and **SM** are all wired up. **Microlocations and Hub Structure
-are deliberately out of scope** — the team maintains Microlocations by hand, and
-both are read by formulas in the other sheets, so the app never writes to either.
+**accounts**, **centers** and **services** are all wired up. **irxdx,
+co-ordinates and micro-location are deliberately out of scope** — the team
+maintains them by hand, and the three registers read them through formulas, so
+the app never writes to any of them.
 
 | Register | Rows | Columns | Id | One row is |
 | --- | --- | --- | --- | --- |
-| BR | 2,708 | 41 | `BR…` | one company |
-| CM | 6,420 | 41 | `CN…` | one center |
-| SM | 6,372 | 34 | `CN…` | one center's service lines |
+| accounts | 2,708 | 46 | `BR…` | one company |
+| centers | 6,420 | 43 | `CN…` | one center |
+| services | 6,372 | 33 | `CN…` | one center's service lines |
 
-CM and SM both number their rows `CN2`, `CN3`… despite the tab names, and in both
-a company legitimately owns many rows — so the legal-name uniqueness check
-applies to BR only.
+centers and services both number their rows `CN2`, `CN3`…, and in both a company
+legitimately owns many rows — so the legal-name uniqueness check applies to
+accounts only.
+
+Column headers are snake_case (`account_global_legal_name`, `center_name`…) and
+each schema in `src/lib/schema/` lists its columns in sheet order, because the
+repo maps fields to columns by position. Columns filled by a single array
+formula in row 2 (`lat`, `lng`, `center_services`) are marked `spill`: the app
+never writes them and never copies their formula into new rows.
 
 ## How it works
 
@@ -39,8 +46,8 @@ one. Handing over a scrollable copy of all 2,708 rows would defeat the reason
 for not sharing the sheet in the first place.
 
 Incomplete new entries and unfinished updates to existing records can be **saved
-for later**. They live in a separate hidden `_Drafts` tab rather than BR, CM or
-SM, so incomplete data never enters a master register or triggers its formulas.
+for later**. They live in a separate hidden `_Drafts` tab rather than accounts, centers
+or services, so incomplete data never enters a master register or triggers its formulas.
 Authenticated updater users can reopen shared drafts from the search screen.
 Completing a new-record draft runs normal validation; applying an update draft
 keeps the source record's revision check. Either action removes the completed
@@ -110,8 +117,8 @@ sheet's `#,##0` formatting), and date columns stay text in the sheet's
 
 **Formulas are never overwritten.** See [Formula columns](#formula-columns).
 
-**No master record is ever simply deleted.** Archiving copies the row to `BR_Archive` *first*,
-then removes it from `BR`. If the copy fails, the original is untouched. A reason
+**No master record is ever simply deleted.** Archiving copies the row to `accounts_archive` *first*,
+then removes it from `accounts`. If the copy fails, the original is untouched. A reason
 is required.
 
 **Every change is logged.** A hidden `_AuditLog` tab records one row per changed
@@ -122,18 +129,24 @@ someone's work.
 
 ## Formula columns
 
-Thirteen columns across the three sheets are **formulas, not data**:
+Twenty-four columns across the three sheets are **formulas, not data**:
 
 | Sheet | Column | Source |
 | --- | --- | --- |
-| BR | `HQ Revenue Range` | banded from `HQ Revenue` |
-| BR | `HQ Employee Range` | banded from `HQ Employee Count` |
-| BR | `First Center`, `Center Type Priority` | `VLOOKUP` into CM |
-| BR | `Hub Structure`, `Primary Location` | `VLOOKUP` into Hub Structure |
-| CM | `CN CONCATENATE`, `CN Unique Key` | built from the identity columns |
-| CM | `Microlocation` | `VLOOKUP` into Microlocations |
-| CM | `First Center`, `Center Type Priority` | computed across the company's centers |
-| SM | `CN CONCATENATE`, `CN Unique Key` | built from the identity columns |
+| accounts | `account_hq_industry`, `account_primary_category`, `account_primary_nature` | `VLOOKUP` into irxdx |
+| accounts | `account_hq_revenue_range` | banded from `account_hq_revenue` |
+| accounts | `account_hq_employee_range` | banded from `account_hq_employee_count` |
+| accounts | `account_center_employees`, `account_center_employees_range` | summed from centers |
+| accounts | `years_in_india`, `account_first_center_year` | derived from centers |
+| centers | `cn_unique_merge`, `cn_unique_key` | built from the identity columns |
+| centers | `center_timeline` | banded from the incorporation / announced year |
+| centers | `center_account_website` | `VLOOKUP` into accounts |
+| centers | `center_micro_location` | `VLOOKUP` into micro-location |
+| centers | `lat`, `lng` | one `ARRAYFORMULA` in row 2, via co-ordinates (`spill`) |
+| centers | `center_employees`, `center_employees_range` | derived from the headcount columns |
+| centers | `center_services` | one `LET` in row 2, summarising services (`spill`) |
+| centers | `center_first_year` | computed across the account's centers |
+| services | `cn_unique_merge`, `cn_unique_key` | built from the identity columns |
 
 They are marked `computed: true` in the schema, which means:
 
@@ -148,13 +161,33 @@ They are marked `computed: true` in the schema, which means:
   formula, because either direction is dangerous.
 
 To change a computed value, change what feeds it. Revenue Range moves when you
-edit the revenue; BR's Center Type Priority moves when you edit the centers in CM.
+edit the revenue; an account's first center year moves when you edit its centers.
 
 ## Data validation
 
 The sheets carry no data-validation rules of their own, so the app supplies them.
-The canonical option lists in `src/lib/schema/*.ts` were derived from the existing
-rows.
+The canonical option lists in `src/lib/schema/*.ts` follow the ETL validator at
+`etl/data_validator/validate.py` in the `bamboo-reports` repo, which is the
+team's source of truth for the allowed vocabulary — not merely what the current
+rows happen to contain.
+
+**Invisible characters are stripped on save.** Zero-width spaces, joiners,
+BOMs, soft hyphens and bidi controls arrive by copy-paste from websites and
+PDFs. They render as nothing but break the `cn_unique_key` joins between the
+registers, so every value is cleaned on the way in (`stripInvisible` in
+`src/lib/format.ts`) rather than reported afterwards.
+
+**Prose columns reject links.** Columns the ETL validator marks "Can Have URL:
+No" carry `noUrl: true` and refuse a pasted link. A link already sitting in such
+a cell is warned about, not blocked, so it cannot trap an unrelated edit.
+
+**Extra shape rules.** `format: "pincode6" | "linkedin" | "digits"` on a field
+adds a check on top of its `kind`: 6-digit PIN codes on `center_zip_code`, a
+`linkedin.com` host on the two LinkedIn columns, and digits-only boardlines.
+
+**A services row needs at least one service line.** Saving one with all eight
+`service_*` columns empty warns; it does not block, since the row may be filled
+in over several sittings.
 
 **Existing non-standard values are preserved.** If a row already holds `1Bn-5Bn`
 (no spaces) the editor offers it as "existing value" and keeps it unless someone
@@ -164,36 +197,17 @@ picks a canonical option. Opening a record never silently rewrites it.
 
 The app does not touch these on its own.
 
-**BR has formula cells that were overwritten by hand at some point.** Those rows
-show a stale value that no longer tracks its inputs. Fixing them means copying
-the formula back down that column:
-
-| Column | Rows overwritten |
-| --- | --- |
-| `HQ Revenue Range` | 23 |
-| `HQ Employee Range` | 23 |
-| `Center Type Priority` | 9 |
-| `First Center` | 8 |
-| `Hub Structure` | 4 |
-| `Primary Location` | 4 |
-
-CM and SM are clean: every formula cell in both still holds its formula.
+All three registers are clean: every formula cell still holds its formula,
+and no data cell holds one.
 
 **Inconsistent values in free-choice columns:**
 
 | Sheet | Column | Issue |
 | --- | --- | --- |
-| BR | `Primary Category` | `IT Service` vs `IT Services`, `Healthcare Life Sciences & Pharma` vs `Pharma & Life Sciences` |
-| BR | `Primary Nature` | `Manufacturing` vs `Manufacturer`, `Retail` vs `Retailer` |
-| BR | `HQ FY End` | one row holds `2025` instead of a month |
-| CM | `Country` | `India` and `india` both appear |
-| CM | `JV Status` | three rows hold the literal text `JV Status` |
-
-**Two sheet headers are misspelled** — `Center Foucs` in CM, and
-`Primary Serivces Foucs` in SM. The schema matches them character for character
-because it has to; the UI shows the corrected label. If you fix the headers in
-the sheet, update `header` in the matching schema file at the same time or the
-app will refuse to open that register.
+| accounts | `account_hq_fy_end` | one row holds `2025` instead of a month |
+| accounts | `account_hq_revenue_source_type`, `account_hq_employee_source_type` | one row each holds `Reuters` |
+| centers | `center_country` | `India` and `india` both appear |
+| centers | `center_jv_status` | three rows hold the literal text `JV Status` |
 
 ## Design system
 

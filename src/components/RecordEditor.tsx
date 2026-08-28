@@ -170,7 +170,7 @@ export default function RecordEditor({
   }
 
   function set(key: string, next: string) {
-    // A field whose choices depend on this one (SM's center list depends on
+    // A field whose choices depend on this one (services' center list depends on
     // the account) cannot keep a value that belongs to the old parent.
     const dependents = schema.fields
       .filter((f) => f.optionSource?.groupBy?.fieldKey === key)

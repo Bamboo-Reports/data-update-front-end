@@ -87,6 +87,30 @@ export function groupNumber(value: string): string {
   return n.toLocaleString("en-US");
 }
 
+/**
+ * Zero-width and other invisible characters. They arrive by copy-paste from
+ * websites and PDFs, render as nothing in Sheets, and silently corrupt the
+ * keys the registers join on: a center whose name carries a zero-width space
+ * no longer matches the same name typed by hand. Stripped from every value on
+ * the way into the sheet rather than reported afterwards.
+ *
+ * Wider than the ETL validator's list, which covers only ZWSP/ZWNJ/ZWJ/BOM and
+ * the soft hyphen. The bidi controls below are just as invisible and just as
+ * damaging — `centers!AH4286` held a phone number ending in U+202C that the
+ * ETL scan reported as clean.
+ */
+const INVISIBLE_CHARS_RE =
+  /[​-‏‪-‮⁠-⁤⁦-⁩﻿­]/g;
+
+export function stripInvisible(value: string): string {
+  return value.replace(INVISIBLE_CHARS_RE, "");
+}
+
+/** True if the text has a link in it. Used for columns that must stay prose. */
+export function containsUrl(value: string): boolean {
+  return /https?:\/\/|www\./i.test(value);
+}
+
 export function isLikelyUrl(value: string): boolean {
   const v = value.trim();
   if (!v) return false;

@@ -16,7 +16,7 @@ import { deleteDraft } from "@/lib/sheets/drafts";
 import { validateRecord } from "@/lib/validate";
 import { requireAdmin, requireUser } from "@/lib/session";
 import { errorResponse } from "@/lib/api";
-import { canonicalSheetDate } from "@/lib/format";
+import { canonicalSheetDate, stripInvisible } from "@/lib/format";
 
 export const dynamic = "force-dynamic";
 // A cold instance may need a multi-second Google read; stay clear of Vercel's
@@ -61,7 +61,7 @@ export async function PATCH(req: NextRequest, { params }: Params) {
       const field = schema.fields.find((f) => f.key === key);
       // Never accept a value for a formula column, whatever the payload says.
       if (!field || field.kind === "readonly" || field.computed) continue;
-      values[key] = String(value ?? "").trim();
+      values[key] = stripInvisible(String(value ?? "").trim());
       if (field.kind === "date" && values[key]) {
         values[key] = canonicalSheetDate(values[key]);
       }
