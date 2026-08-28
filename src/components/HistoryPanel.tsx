@@ -88,7 +88,7 @@ export default function HistoryPanel({
           {!entries && !error && <HistoryListSkeleton rows={3} />}
 
           {entries?.length === 0 && (
-            <div className="border-border rounded-lg border border-dashed px-5 py-9 text-center">
+            <div className="border-border border border-dashed px-5 py-9 text-center">
               <p className="text-ink text-sm font-medium">No edits yet</p>
               <p className="text-muted-foreground mt-1.5 text-sm text-pretty">
                 This app records changes made here. It cannot see edits made
@@ -98,7 +98,7 @@ export default function HistoryPanel({
           )}
 
           {entries && entries.length > 0 && (
-            <ol className="border-border divide-border overflow-hidden rounded-lg border">
+            <ol className="border-border divide-border overflow-hidden border">
               {entries.map((e, i) => (
               <li
                 key={`${e.timestamp}-${e.field}-${i}`}
@@ -117,11 +117,11 @@ export default function HistoryPanel({
 
                 {e.action === "update" ? (
                   <div className="mt-3 grid grid-cols-[1fr_auto_1fr] items-center gap-2 text-xs">
-                    <p className="text-muted-foreground line-clamp-3 rounded-md bg-muted px-2.5 py-2 line-through">
+                    <p className="text-muted-foreground line-clamp-3 bg-muted px-2.5 py-2 line-through">
                       {e.oldValue || "(blank)"}
                     </p>
                     <ArrowRight aria-hidden="true" className="text-muted-foreground size-3.5" />
-                    <p className="text-ink line-clamp-3 rounded-md bg-accent px-2.5 py-2">
+                    <p className="text-ink line-clamp-3 bg-accent px-2.5 py-2">
                       {e.newValue || "(blank)"}
                     </p>
                   </div>

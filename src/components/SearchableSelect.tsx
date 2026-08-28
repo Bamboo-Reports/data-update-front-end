@@ -204,7 +204,7 @@ export default function SearchableSelect({
                 if (event.key === "ArrowDown") moveOptionFocus(event, 1);
                 if (event.key === "ArrowUp") moveOptionFocus(event, -1);
               }}
-              className="focus:bg-accent focus:text-accent-foreground relative flex w-full items-center rounded-md py-1.5 pr-8 pl-2 text-start text-sm outline-none"
+              className="focus:bg-accent focus:text-accent-foreground relative flex w-full items-center py-1.5 pr-8 pl-2 text-start text-sm outline-none"
             >
               <span className="text-muted-foreground">
                 {required ? "Select..." : "Leave blank"}
@@ -231,7 +231,7 @@ export default function SearchableSelect({
                 if (event.key === "ArrowDown") moveOptionFocus(event, 1);
                 if (event.key === "ArrowUp") moveOptionFocus(event, -1);
               }}
-              className="focus:bg-accent focus:text-accent-foreground relative flex w-full items-center rounded-md py-1.5 pr-8 pl-2 text-start text-sm outline-none"
+              className="focus:bg-accent focus:text-accent-foreground relative flex w-full items-center py-1.5 pr-8 pl-2 text-start text-sm outline-none"
             >
               <span className="min-w-0 break-words">
                 {option}
@@ -258,7 +258,7 @@ export default function SearchableSelect({
                 if (event.key === "ArrowDown") moveOptionFocus(event, 1);
                 if (event.key === "ArrowUp") moveOptionFocus(event, -1);
               }}
-              className="focus:bg-accent focus:text-accent-foreground border-border relative mt-1 flex w-full items-center rounded-md border-t py-1.5 pr-8 pl-2 text-start text-sm outline-none"
+              className="focus:bg-accent focus:text-accent-foreground border-border relative mt-1 flex w-full items-center border-t py-1.5 pr-8 pl-2 text-start text-sm outline-none"
             >
               <Plus aria-hidden="true" className="text-muted-foreground mr-1.5 size-3.5 shrink-0" />
               <span className="min-w-0 break-words">
