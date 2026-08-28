@@ -170,7 +170,7 @@ export default function RecordEditor({
   }
 
   function set(key: string, next: string) {
-    // A field whose choices depend on this one (SM's center list depends on
+    // A field whose choices depend on this one (services' center list depends on
     // the account) cannot keep a value that belongs to the old parent.
     const dependents = schema.fields
       .filter((f) => f.optionSource?.groupBy?.fieldKey === key)
@@ -327,8 +327,8 @@ export default function RecordEditor({
           // Match SheetContent's side-scoped position and size classes so
           // tailwind-merge replaces the drawer defaults predictably. The inset
           // floats the editor off all four edges; overflow-hidden keeps the
-          // header and footer borders inside the rounded corners.
-          className="gap-0 overflow-hidden rounded-xl border p-0 data-[side=right]:inset-3 data-[side=right]:h-auto data-[side=right]:w-auto data-[side=right]:max-w-none data-[side=right]:sm:inset-6 data-[side=right]:sm:max-w-none"
+          // header and footer borders inside the corners.
+          className="gap-0 overflow-hidden border p-0 data-[side=right]:inset-3 data-[side=right]:h-auto data-[side=right]:w-auto data-[side=right]:max-w-none data-[side=right]:sm:inset-6 data-[side=right]:sm:max-w-none"
           onInteractOutside={(e) => {
             // Losing a half-finished record to a stray click is not recoverable.
             // The dialogs portal outside this sheet, so clicking either dialog
@@ -416,7 +416,7 @@ export default function RecordEditor({
             </div>
 
             {!isNew && !isDraft && canArchive && (
-              <div className="border-destructive/25 bg-danger-surface/50 mt-9 flex flex-wrap items-center gap-3 rounded-lg border px-3.5 py-3">
+              <div className="border-destructive/25 bg-danger-surface/50 mt-9 flex flex-wrap items-center gap-3 border px-3.5 py-3">
                 <div className="min-w-0">
                   <p className="text-ink text-sm font-medium">Archive this record</p>
                   <p className="text-muted-foreground text-xs text-pretty">
@@ -524,7 +524,7 @@ export default function RecordEditor({
             </AlertDialogDescription>
           </AlertDialogHeader>
 
-          <div className="border-border max-h-[50vh] divide-y overflow-y-auto rounded-lg border">
+          <div className="border-border max-h-[50vh] divide-y overflow-y-auto border">
             {reviewRows.map((row) => (
               <div key={row.key} className="px-3.5 py-3">
                 <p className="text-foreground text-xs font-semibold">

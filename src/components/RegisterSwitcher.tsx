@@ -43,8 +43,8 @@ export default function RegisterSwitcher({
             data-loading={loading || undefined}
             className={
               selected
-                ? "bg-secondary text-foreground focus-visible:ring-ring data-loading:animate-pulse flex min-h-9 shrink-0 items-center rounded-md px-3 py-1 text-xs font-semibold outline-none transition-colors focus-visible:ring-2 focus-visible:ring-offset-2"
-                : "text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:ring-ring flex min-h-9 shrink-0 items-center rounded-md px-3 py-1 text-xs font-medium outline-none transition-colors focus-visible:ring-2 focus-visible:ring-offset-2"
+                ? "bg-secondary text-foreground focus-visible:ring-ring data-loading:animate-pulse flex min-h-9 shrink-0 items-center px-3 py-1 text-xs font-semibold outline-none transition-colors focus-visible:ring-2 focus-visible:ring-offset-2"
+                : "text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:ring-ring flex min-h-9 shrink-0 items-center px-3 py-1 text-xs font-medium outline-none transition-colors focus-visible:ring-2 focus-visible:ring-offset-2"
             }
           >
             {sheet.label}

@@ -53,7 +53,7 @@ export default function RecordFinder({
   const [cursor, setCursor] = useState(-1);
   const [editor, setEditor] = useState<EditorTarget>(null);
   const [historyFor, setHistoryFor] = useState<RecordRow | null>(null);
-  // The BR → CM → SM chain that follows a create, driven by LinkedRecordFlow.
+  // The accounts → centers → services chain that follows a create, driven by LinkedRecordFlow.
   const [linkedStep, setLinkedStep] = useState<LinkedStep | null>(null);
   const [drafts, setDrafts] = useState<DraftRecord[]>(initialDrafts ?? []);
   const [draftsLoading, setDraftsLoading] = useState(false);
@@ -164,7 +164,7 @@ export default function RecordFinder({
         const sp = new URLSearchParams({
           q: term,
           pageSize: String(MAX_PAGE_SIZE),
-          // Sorting by the record's own name column keeps CM and SM sensible
+          // Sorting by the record's own name column keeps centers and services sensible
           // too, where the title is the center rather than the company.
           sortBy: card.titleKey,
           sortDir: "asc",
@@ -257,7 +257,7 @@ export default function RecordFinder({
     <main className="mx-auto w-full max-w-5xl px-4 pt-10 pb-24 sm:px-6 sm:pt-16">
       <div className="max-w-2xl">
         <h1 className="text-ink text-3xl font-semibold tracking-tight text-balance sm:text-4xl">
-          Find a {schema.label} record
+          Find a record in {schema.label}
         </h1>
         <p className="text-muted-foreground mt-2 max-w-xl text-sm text-pretty sm:text-base">
           Search by company, {schema.idPrefix} number, city, or website.
@@ -281,7 +281,7 @@ export default function RecordFinder({
             onKeyDown={onSearchKeyDown}
             placeholder="Adobe, BR46, Bengaluru..."
             aria-label={`Search ${schema.label} records`}
-            className="bg-card h-12 rounded-lg pr-11 pl-12 text-base shadow-xs md:text-base"
+            className="bg-card h-12 pr-11 pl-12 text-base shadow-xs md:text-base"
           />
           {q && (
             <Button
@@ -328,7 +328,7 @@ export default function RecordFinder({
         {error && (
           <p
             role="alert"
-            className="border-destructive/30 bg-danger-surface text-destructive rounded-lg border px-4 py-3 text-sm"
+            className="border-destructive/30 bg-danger-surface text-destructive border px-4 py-3 text-sm"
           >
             {error}
           </p>
@@ -337,7 +337,7 @@ export default function RecordFinder({
         {draftError && (
           <p
             role="alert"
-            className="border-warn/30 bg-card text-warn mb-5 rounded-lg border px-4 py-3 text-sm"
+            className="border-warn/30 bg-card text-warn mb-5 border px-4 py-3 text-sm"
           >
             {draftError}
           </p>
@@ -354,7 +354,7 @@ export default function RecordFinder({
                 {matchingDrafts.length}
               </span>
             </div>
-            <div className="border-warn/30 divide-border divide-y overflow-hidden rounded-lg border">
+            <div className="border-warn/30 divide-border divide-y overflow-hidden border">
               {matchingDrafts.map((draft) => (
                 <DraftCard
                   key={draft.id}
@@ -370,7 +370,7 @@ export default function RecordFinder({
         {loading && !result && <ResultListSkeleton rows={3} />}
 
         {searchable && result && records.length === 0 && matchingDrafts.length === 0 && !loading && !draftsLoading && (
-            <div className="border-border bg-card rounded-lg border px-6 py-10 text-center">
+            <div className="border-border bg-card border px-6 py-10 text-center">
             <p className="text-ink text-sm font-medium">
               No record matches &quot;{debouncedQ.trim()}&quot;
             </p>
@@ -395,8 +395,8 @@ export default function RecordFinder({
             <div
               className={
                 loading
-                  ? "divide-border divide-y overflow-hidden rounded-lg border opacity-60 transition-opacity"
-                  : "divide-border divide-y overflow-hidden rounded-lg border transition-opacity"
+                  ? "divide-border divide-y overflow-hidden border opacity-60 transition-opacity"
+                  : "divide-border divide-y overflow-hidden border transition-opacity"
               }
             >
               {records.map((r, i) => (
@@ -433,10 +433,10 @@ export default function RecordFinder({
         )}
 
         {!q && !error && !draftsLoading && drafts.length === 0 && (
-          <div className="border-border/80 bg-card/60 rounded-lg border border-dashed px-5 py-8">
+          <div className="border-border/80 bg-card/60 border border-dashed px-5 py-8">
             <p className="text-foreground text-sm font-medium">Search by name or record number</p>
             <p className="text-muted-foreground mt-1 text-sm">
-              Results appear as you type. Press <kbd className="border-border bg-muted rounded border px-1.5 py-0.5 text-xs">/</kbd> anytime to return here.
+              Results appear as you type. Press <kbd className="border-border bg-muted border px-1.5 py-0.5 text-xs">/</kbd> anytime to return here.
             </p>
           </div>
         )}
@@ -481,7 +481,7 @@ export default function RecordFinder({
           onStep={setLinkedStep}
           onDone={() => {
             setLinkedStep(null);
-            // The chain may have written to this register (CM page → new CM).
+            // The chain may have written to this register (centers page → new center).
             setReloadToken((n) => n + 1);
             setDraftReloadToken((n) => n + 1);
           }}
@@ -530,7 +530,7 @@ function DraftCard({
       onClick={onOpen}
       className="bg-card hover:bg-muted/70 focus-visible:ring-ring relative flex min-h-20 w-full items-center gap-3 px-4 py-3 text-left outline-none transition-colors focus-visible:z-10 focus-visible:ring-2 focus-visible:ring-inset sm:gap-4"
     >
-      <span className="border-warn/40 text-warn shrink-0 rounded-md border px-2 py-1 text-xs font-semibold">
+      <span className="border-warn/40 text-warn shrink-0 border px-2 py-1 text-xs font-semibold">
         {draft.recordId ?? "Draft"}
       </span>
       <span className="min-w-0 flex-1">
@@ -587,7 +587,7 @@ function ResultCard({
         onClick={onOpen}
         className="focus-visible:ring-ring relative flex min-w-0 flex-1 items-center gap-3 px-4 py-3 text-left outline-none focus-visible:z-10 focus-visible:ring-2 focus-visible:ring-inset sm:gap-4"
       >
-        <span className="accession bg-accent text-accent-foreground shrink-0 rounded-md px-2 py-1 text-xs">
+        <span className="accession bg-accent text-accent-foreground shrink-0 px-2 py-1 text-xs">
           {record.id}
         </span>
 

@@ -81,7 +81,7 @@ export default async function SheetPage({
             <p className="text-pretty">
               Editing is off because a write could land in the wrong column.
               Restore the column order in the sheet, or update{" "}
-              <code className="bg-muted rounded px-1 py-0.5 text-xs font-medium">
+              <code className="bg-muted px-1 py-0.5 text-xs font-medium">
                 src/lib/schema/{schema.id}.ts
               </code>{" "}
               to match it.
@@ -90,7 +90,7 @@ export default async function SheetPage({
               {schemaProblems.map((p) => (
                 <li
                   key={p}
-                  className="border-border bg-card text-ink rounded border px-3 py-2 text-xs"
+                  className="border-border bg-card text-ink border px-3 py-2 text-xs"
                 >
                   {p}
                 </li>

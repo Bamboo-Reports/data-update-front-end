@@ -30,7 +30,7 @@ export interface FieldDef {
     /**
      * Partition the choices by another column of the source tab, and show
      * only the partition matching this record's value for `fieldKey`. Used
-     * for SM's Center Legal Name, which must be a center of the chosen account.
+     * for services' Center Name, which must be a center of the chosen account.
      */
     groupBy?: {
       header: string;
@@ -43,6 +43,17 @@ export interface FieldDef {
      */
     creatable?: boolean;
   };
+  /**
+   * The column must stay prose: a pasted link is a mistake, not data. Mirrors
+   * the ETL validator's "Can Have URL: No".
+   */
+  noUrl?: boolean;
+  /**
+   * An extra shape check beyond `kind`, applied once the kind check passes.
+   * A string rather than a RegExp because the schema is serialised to the
+   * client with the page.
+   */
+  format?: "pincode6" | "linkedin" | "digits";
   /** Form section this field lives under. */
   group: string;
   /** Helper text under the input. */
@@ -54,6 +65,14 @@ export interface FieldDef {
    * writes it, because a plain value write would destroy the formula.
    */
   computed?: boolean;
+  /**
+   * The column is filled by a single array formula that lives in row 2 and
+   * spills down the whole sheet (or is the neighbouring column that formula
+   * spills into). Implies `computed`: never written. Unlike an ordinary
+   * computed column its formula must not be copied into new rows, and its
+   * cells outside row 2 hold no formula of their own.
+   */
+  spill?: boolean;
   /** Soft cap surfaced in the editor; not enforced by the sheet. */
   maxLength?: number;
 }
@@ -69,8 +88,8 @@ export interface SheetSchema {
   /** Header used as the human-readable name of a record. */
   titleHeader: string;
   /**
-   * Whether `titleHeader` must be unique. True for BR, where one row is one
-   * company. False for CM and SM, where a company legitimately has many rows.
+   * Whether `titleHeader` must be unique. True for accounts, where one row is
+   * one company. False for centers and services, where a company legitimately has many rows.
    */
   titleUnique: boolean;
   /** Extra headers shown under the name on a search result card. */

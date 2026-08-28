@@ -1,5 +1,38 @@
 import type { SheetSchema } from "./schema/types";
-import { isCanonicalSheetDate, isLikelyUrl, parseYear } from "./format";
+import { containsUrl, isCanonicalSheetDate, isLikelyUrl, parseYear } from "./format";
+
+/** Shape checks for `FieldDef.format`, kept beside the messages they produce. */
+const FORMAT_RULES: Record<
+  NonNullable<import("./schema/types").FieldDef["format"]>,
+  { test: (value: string) => boolean; message: (label: string) => string }
+> = {
+  pincode6: {
+    test: (v) => /^\d{6}$/.test(v),
+    message: (label) => `${label} must be a 6-digit Indian PIN code.`,
+  },
+  linkedin: {
+    test: (v) => v.toLowerCase().includes("linkedin.com"),
+    message: (label) => `${label} must be a linkedin.com link.`,
+  },
+  digits: {
+    // Sheets number-formats long phone numbers, so "4,068,181,301" is a
+    // legitimate stored shape and the separators have to be accepted.
+    test: (v) => /^[\d+][\d\s,()+-]*$/.test(v),
+    message: (label) => `${label} must be a phone number: digits, spaces and + ( ) - only.`,
+  },
+};
+
+/** The service-line columns; a services row needs at least one of them. */
+const SERVICE_LINE_KEYS = [
+  "it",
+  "erd",
+  "fna",
+  "hr",
+  "procurement",
+  "salesMarketing",
+  "customerSupport",
+  "others",
+] as const;
 
 export interface ValidationOutcome {
   /** field key to message. Blocks the save. */
@@ -74,6 +107,17 @@ export function validateRecord(
       continue;
     }
 
+    // A link pasted into a prose column. Legacy values are warned about rather
+    // than blocked, so an untouched bad cell cannot trap the rest of the form.
+    if (field.noUrl && containsUrl(value)) {
+      if (opts.current?.[field.key] === value) {
+        warnings[field.key] = `${field.label} holds a link. It is meant to be text only.`;
+      } else {
+        errors[field.key] = `${field.label} must not contain a link.`;
+        continue;
+      }
+    }
+
     if (field.maxLength && value.length > field.maxLength) {
       errors[field.key] =
         `${field.label} is ${value.length} characters; the limit is ${field.maxLength}.`;
@@ -127,12 +171,24 @@ export function validateRecord(
       default:
         break;
     }
+
+    // Shape rules that sit on top of the kind check, so a value only reaches
+    // this once it is already a well-formed number, URL and so on.
+    const format = field.format ? FORMAT_RULES[field.format] : undefined;
+    if (format && !errors[field.key] && !format.test(value)) {
+      const isCurrent = opts.current?.[field.key] === value;
+      if (isCurrent) {
+        warnings[field.key] = format.message(field.label);
+      } else {
+        errors[field.key] = format.message(field.label);
+      }
+    }
   }
 
   /* cross-field rules */
 
   const nameKey = schema.fields.find((f) => f.header === schema.titleHeader)?.key;
-  // CM and SM legitimately hold many rows per company, so this only applies
+  // centers and services legitimately hold many rows per company, so this only applies
   // where the schema says the name identifies the record.
   if (schema.titleUnique && nameKey && nameKey in values && opts.takenNames) {
     const name = (values[nameKey] ?? "").trim().toLowerCase();
@@ -141,16 +197,27 @@ export function validateRecord(
     }
   }
 
-  if (schema.id === "br") {
-    const gcc = (merged.gccStatus ?? "").trim();
-    const nonGccComment = (merged.nonGccComments ?? "").trim();
-    if (gcc === "GCC" && nonGccComment && "nonGccComments" in values) {
-      errors.nonGccComments = "Non GCC Comments only applies when GCC / Non GCC is 'Non GCC'.";
+  if (schema.id === "accounts") {
+    const visibility = (merged.visibility ?? "").trim();
+    const note = (merged.visibilityNote ?? "").trim();
+    if (visibility === "GCC" && note && "visibilityNote" in values) {
+      errors.visibilityNote = "Visibility Note only applies when Visibility is 'NON-GCC'.";
     }
-    if (gcc === "Non GCC" && !nonGccComment && "gccStatus" in values) {
-      warnings.nonGccComments = "Non GCC records usually carry a Non GCC Comment.";
+    if (visibility === "NON-GCC" && !note && "visibility" in values) {
+      warnings.visibilityNote = "NON-GCC accounts usually carry a Visibility Note.";
     }
+  }
 
+  // Every services row should describe at least one service line. Only raised
+  // when the save actually touches a service column, so editing an address on
+  // a row that was already empty does not nag about something else.
+  if (schema.id === "services") {
+    const touchesService = SERVICE_LINE_KEYS.some((key) => key in values);
+    const anyFilled = SERVICE_LINE_KEYS.some((key) => (merged[key] ?? "").trim() !== "");
+    if (touchesService && !anyFilled) {
+      warnings.it =
+        "This center has no service lines filled in. Add at least one, or the row records nothing.";
+    }
   }
 
   return { errors, warnings };

@@ -4,6 +4,7 @@ import { NotFoundError, ValidationError } from "@/lib/sheets/repo";
 import { deleteDraft, listDrafts, saveDraft } from "@/lib/sheets/drafts";
 import { requireUser } from "@/lib/session";
 import { errorResponse } from "@/lib/api";
+import { stripInvisible } from "@/lib/format";
 
 export const dynamic = "force-dynamic";
 // A cold instance may need a multi-second Google read; stay clear of Vercel's
@@ -21,7 +22,7 @@ function cleanValues(
   return Object.fromEntries(
     schema.fields
       .filter((field) => !field.computed && field.kind !== "readonly")
-      .map((field) => [field.key, String(incoming[field.key] ?? "")]),
+      .map((field) => [field.key, stripInvisible(String(incoming[field.key] ?? ""))]),
   );
 }
 
@@ -30,7 +31,10 @@ function cleanAllValues(
   incoming: Record<string, unknown>,
 ): Record<string, string> {
   return Object.fromEntries(
-    schema.fields.map((field) => [field.key, String(incoming[field.key] ?? "")]),
+    schema.fields.map((field) => [
+      field.key,
+      stripInvisible(String(incoming[field.key] ?? "")),
+    ]),
   );
 }
 

@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { signIn } from "@/auth";
 import { currentUser } from "@/lib/session";
 import SignInButton from "@/components/SignInButton";
+import ThemeSwitcher from "@/components/ThemeSwitcher";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
 export const dynamic = "force-dynamic";
@@ -28,20 +29,21 @@ export default async function SignInPage({
 
   return (
     <main className="grid min-h-screen place-items-center px-5 py-12">
-      <div className="border-border bg-card w-full max-w-sm rounded-xl border p-6 shadow-sm sm:p-8">
+      <div className="border-border bg-card w-full max-w-sm border p-6 shadow-sm sm:p-8">
         <div className="mb-8 flex items-center gap-2">
           <span aria-hidden="true" className="bg-primary block size-2 rounded-full" />
           <span className="text-ink text-sm font-semibold tracking-tight">
             Bamboo Reports Updater
           </span>
+          <ThemeSwitcher className="ml-auto" />
         </div>
 
         <h1 className="text-ink text-2xl font-semibold tracking-tight">
           Sign in to update records
         </h1>
         <p className="text-muted-foreground mt-2 text-sm text-pretty">
-          Search and maintain BR, CM, and SM records without opening the master
-          sheet.
+          Search and maintain accounts, centers and services without opening the
+          master sheet.
         </p>
 
         {message && (

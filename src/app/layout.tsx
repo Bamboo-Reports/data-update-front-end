@@ -1,26 +1,26 @@
 import type { Metadata } from "next";
-import { DM_Sans } from "next/font/google";
+import { Geist } from "next/font/google";
 import { Toaster } from "@/components/ui/sonner";
 import { ThemeProvider } from "@/components/theme-provider";
 import { cn } from "@/lib/utils";
 import "./globals.css";
 
-const dmSans = DM_Sans({
+const geist = Geist({
   subsets: ["latin"],
-  variable: "--font-dm-sans",
+  variable: "--font-sans",
   display: "swap",
 });
 
 export const metadata: Metadata = {
   title: "Bamboo Reports Updater",
-  description: "Look up and maintain records in the CM/SM Centers master sheet",
+  description: "Look up and maintain accounts, centers and services in the master sheet",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html
       lang="en"
-      className={cn(dmSans.variable)}
+      className={cn(geist.variable, "font-sans")}
       suppressHydrationWarning
     >
       <body className="min-h-screen font-sans antialiased">

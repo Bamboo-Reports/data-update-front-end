@@ -1,18 +1,19 @@
-import { BR_SCHEMA } from "./br";
-import { CM_SCHEMA } from "./cm";
-import { SM_SCHEMA } from "./sm";
+import { ACCOUNTS_SCHEMA } from "./accounts";
+import { CENTERS_SCHEMA } from "./centers";
+import { SERVICES_SCHEMA } from "./services";
 import type { SheetSchema } from "./types";
 
 /**
- * Every sheet the app is allowed to touch. Adding CM or SM means adding a
+ * Every sheet the app is allowed to touch. Adding a register means adding a
  * schema file here; no route or component needs to change.
  *
- * "Microlocations" is deliberately absent: the team maintains it by hand.
+ * "irxdx", "co-ordinates" and "micro-location" are deliberately absent: the
+ * team maintains them by hand and the other tabs read them through formulas.
  */
 export const SCHEMAS: Record<string, SheetSchema> = {
-  br: BR_SCHEMA,
-  cm: CM_SCHEMA,
-  sm: SM_SCHEMA,
+  accounts: ACCOUNTS_SCHEMA,
+  centers: CENTERS_SCHEMA,
+  services: SERVICES_SCHEMA,
 };
 
 export function getSchema(id: string): SheetSchema | null {
